@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 //axios.defaults.withCredentials = true; 
-axios.defaults.baseURL = 'http://127.0.0.1:8000'; 
+axios.defaults.baseURL = 'https://pemakaman.alwaysdata.net/api'; 
 const token = localStorage.getItem('authToken');
 if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
