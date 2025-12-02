@@ -1,16 +1,28 @@
 import React, { useState } from 'react';
-import { Phone, Mail } from 'lucide-react';
+import { X, Phone, Mail, MapPin, Eye } from 'lucide-react';
 import { ORDER_STATUSES } from '../utils/constants';
 import KavlingManagement from './KavlingManagement';
 
 const AdminDashboard = ({ orders, plots, fetchPlots, isLoading, handleLogout, handleStatusChange, showNotification }) => {
     
     const [activeTab, setActiveTab] = useState('');
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
     // Hitung status order
     const pendingCount = orders.filter(o => o.status === 'pending').length;
     const processingCount = orders.filter(o => o.status === 'processing').length;
     const readyCount = orders.filter(o => o.status === 'ready').length;
     const completedCount = orders.filter(o => o.status === 'completed').length;
+
+    const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setIsDetailModalOpen(true);
+   };
+
+    const closeDetailModal = () => {
+        setSelectedOrder(null);
+        setIsDetailModalOpen(false);
+    };
 
     return (
      <div className="max-w-6xl mx-auto p-6">
@@ -98,8 +110,8 @@ const AdminDashboard = ({ orders, plots, fetchPlots, isLoading, handleLogout, ha
                                     <div className="text-stone-500 text-xs truncate max-w-[150px]">{order.notes || '-'}</div>
                                   </td>
                                   <td className="px-6 py-4 font-bold text-emerald-800">
-                                    kavling number: null
-                                  </td>
+                                    {order.kavling_number || 'Nomor Kavling Belum Ada'}
+                                </td>
                                   <td className="px-6 py-4">
                                     <div className="flex items-center gap-2 text-stone-600 mb-1">
                                       <Phone className="w-3 h-3" /> {order.phone}
@@ -125,6 +137,12 @@ const AdminDashboard = ({ orders, plots, fetchPlots, isLoading, handleLogout, ha
                                         <option key={key} value={key}>{val.label}</option>
                                       ))}
                                     </select>
+                                    <button
+                                        onClick={() => handleViewDetails(order)}
+                                        className="border-stone-200 mt-2 text-blue-500 hover:text-blue-700 text-xs flex items-center gap-1"
+                                    >
+                                      <Eye size={20} /> Detail
+                                    </button>
                                   </td>
                                 </tr>
                               );
@@ -144,6 +162,97 @@ const AdminDashboard = ({ orders, plots, fetchPlots, isLoading, handleLogout, ha
                     showNotification={showNotification}
                 />
             )}
+
+            {isDetailModalOpen && selectedOrder && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 ">
+        <div className="bg-white mt-25 rounded-xl w-full max-w-lg shadow-2xl space-y-4 animate-in zoom-in duration-300">
+            
+            {/* Header Modal */}
+            <div className="flex justify-between items-center p-3 border-b bg-stone-50 rounded-t-xl">
+                <h3 className="text-xl font-bold text-emerald-800">Detail Pesanan #{selectedOrder.id}</h3>
+                <button type="button" onClick={closeDetailModal} className="text-stone-500 hover:text-red-600">
+                    <X size={20} />
+                </button>
+            </div>
+            
+            {/* Body Detail */}
+            <div className="pl-5 mt-0 space-y-5">
+                
+                  {/* Status & ID */}
+                      <div className="flex justify-between items-center pb-0 pt-0 border-b border-stone-100">
+                          <p className="text-sm font-medium text-stone-500">Tanggal Order: <span className="font-semibold text-stone-700">{selectedOrder.order_date || 'N/A'}</span></p>
+                          {(() => {
+                              const statusData = ORDER_STATUSES[selectedOrder.status] || ORDER_STATUSES.pending;
+                              const StatusIcon = statusData.icon;
+                              
+                              return (
+                                  <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${statusData.color}`}>
+                                      <StatusIcon className="w-3 h-3" /> 
+                                      {statusData.label}
+                                  </span>
+                              );
+                          })()}
+                
+            </div>
+
+                {/* Informasi Pelanggan */}
+                <h4 className="font-bold text-stone-700 border-b pb-1">Informasi Pelanggan</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    <div className="flex flex-col">
+                        <span className="text-stone-500 text-xs">Nama Lengkap:</span>
+                        <span className="font-medium text-stone-900">{selectedOrder.customer_name}</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-stone-500 text-xs">Email:</span>
+                        <span className="font-medium text-stone-900 flex items-center gap-1"><Mail size={12} /> {selectedOrder.email}</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-stone-500 text-xs">Telepon:</span>
+                        <span className="font-medium text-stone-900 flex items-center gap-1"><Phone size={12} /> {selectedOrder.phone}</span>
+                    </div>
+                    <div className="flex flex-col col-span-2">
+                        <span className="text-stone-500 text-xs">Alamat:</span>
+                        <span className="font-medium text-stone-900 flex items-center gap-1"><MapPin size={12} /> {selectedOrder.address || '-'}</span>
+                    </div>
+                </div>
+
+                {/* Detail Kavling */}
+                <h4 className="font-bold text-stone-700 border-b pb-1 pt-3">Detail Kavling</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    <div className="flex flex-col">
+                        <span className="text-stone-500 text-xs">Nomor Kavling:</span>
+                        {/* ASUMSI data kavling ada di selectedOrder.kavling.number */}
+                        <span className="font-bold text-emerald-700 text-lg">{selectedOrder.kavling_number || 'Data Kavling Hilang'}</span> 
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-stone-500 text-xs">Ukuran/Tipe:</span>
+                        <span className="font-medium text-stone-900">{selectedOrder.kavling_size || '-'}</span>
+                    </div>
+                    <div className="flex flex-col col-span-2">
+                        <span className="text-stone-500 text-xs">Harga Total:</span>
+                        <span className="font-bold text-emerald-600 text-md">{selectedOrder.total_price ? formatRupiah(selectedOrder.total_price) : 'N/A'}</span>
+                    </div>
+                </div>
+
+                {/* Catatan Tambahan */}
+                <h4 className="font-bold text-stone-700 border-b pb-1 pt-3">Catatan Admin/Internal</h4>
+                <div className="p-3 bg-stone-50 border rounded-lg text-sm text-stone-700">
+                    {selectedOrder.notes || 'Tidak ada catatan tambahan.'}
+                </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div className="p-4 flex justify-end bg-stone-50 rounded-b-xl">
+                <button 
+                    onClick={closeDetailModal}
+                    className="bg-stone-300 text-stone-700 px-4 py-2 rounded-lg hover:bg-stone-400 transition"
+                >
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+)}
         </div>
     );
   };

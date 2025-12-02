@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCcwDot, Pencil, Trash2, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+// Tambahkan import ArrowUpDown untuk ikon sort
+import { Plus, RefreshCcwDot, Pencil, Trash2, X, ArrowUpDown } from 'lucide-react';
 import axios from '../config/axios';
 import { formatRupiah } from '../utils/formatRupiah';
 
@@ -7,30 +8,58 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
     // STATE MANAGEMENT
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPlot, setCurrentPlot] = useState(null); 
-    const [formData, setFormData] = useState({ number: '', size: '', price: '' });
+    const [formData, setFormData] = useState({ number: '', size: '', price: '', status: '' });
     const [isLoading, setIsLoading] = useState(false); 
+    
+    // STATE BARU: Untuk menyimpan urutan sort (asc = naik, desc = turun)
+    const [sortOrder, setSortOrder] = useState('asc'); 
 
     // Panggil fetchPlots saat komponen dimuat
     useEffect(() => {
         fetchPlots(); 
     }, [fetchPlots]);
 
-    // HANDLERS
+    // LOGIKA SORTING (Natural Sort)
+    // Kita gunakan useMemo agar sorting hanya dijalankan jika data plots atau sortOrder berubah
+    const sortedPlots = useMemo(() => {
+        // Buat salinan array agar tidak memutasi props asli
+        let dataToSort = [...plots];
+
+        dataToSort.sort((a, b) => {
+            // Pastikan nilai adalah string
+            const valA = a.number ? a.number.toString() : '';
+            const valB = b.number ? b.number.toString() : '';
+
+            // localeCompare dengan opsi { numeric: true } menangani A1, A2, A10 dengan benar
+            if (sortOrder === 'asc') {
+                return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
+            } else {
+                return valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' });
+            }
+        });
+
+        return dataToSort;
+    }, [plots, sortOrder]);
+
+    // HANDLER UNTUK UBAH URUTAN
+    const toggleSort = () => {
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    };
+
+    // HANDLERS LAINNYA
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleEditClick = (plot) => {
         setCurrentPlot(plot);
-        // Pastikan price adalah string untuk input type="number"
-        setFormData({ number: plot.number, size: plot.size, price: String(plot.price) }); 
+        setFormData({ number: plot.number, size: plot.size, price: String(plot.price), status: plot.status }); 
         setIsModalOpen(true);
     };
 
-    // DEFINISI FUNGSI handleAddClick
     const handleAddClick = () => { 
         setCurrentPlot(null);
-        setFormData({ number: '', size: '', price: '' });
+        setFormData({ number: '', size: '', price: '', status: '' });
         setIsModalOpen(true);
     };
 
@@ -38,8 +67,8 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
         e.preventDefault();
         setIsLoading(true);
         const endpoint = currentPlot 
-            ? `/api/plots/${currentPlot.id}` // Jika edit (PUT)
-            : '/api/plots'; // Jika tambah baru (POST)
+            ? `/api/plots/${currentPlot.id}`
+            : '/api/plots'; 
 
         const method = currentPlot ? axios.put : axios.post;
 
@@ -65,7 +94,7 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
             fetchPlots(); 
         } catch (error) {
             console.error("Kavling Delete Error:", error);
-            showNotification('Gagal menghapus kavling.', 'error');
+            showNotification('Gagal menghapus kavling, Karena ada yang Order!!', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -99,9 +128,18 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="text-stone-500 bg-stone-50 uppercase text-xs">
-                            <tr>
-                                <th className="px-6 py-3">ID</th>
-                                <th className="px-6 py-3">Nomor Kavling</th>
+                            <tr>   
+                                <th 
+                                    className="px-6 py-3 cursor-pointer hover:bg-stone-200 transition group select-none"
+                                    onClick={toggleSort}
+                                    title="Klik untuk mengurutkan"
+                                >
+                                    <div className="flex items-center gap-1">
+                                        Nomor Kavling
+                                        <ArrowUpDown size={14} className={`text-stone-400 ${sortOrder === 'asc' ? 'text-emerald-600' : ''}`} />
+                                    </div>
+                                </th>
+
                                 <th className="px-6 py-3">Ukuran</th>
                                 <th className="px-6 py-3">Harga</th>
                                 <th className="px-6 py-3">Status</th>
@@ -109,14 +147,12 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {plots.map((plot) => (
+                            {sortedPlots.map((plot) => (
                                 <tr key={plot.id} className="bg-white border-b hover:bg-stone-50 transition">
-                                    <td className="px-6 py-4">{plot.id}</td>
                                     <td className="px-6 py-4 font-bold">{plot.number}</td>
                                     <td className="px-6 py-4">{plot.size}</td>
                                     <td className="px-6 py-4 text-emerald-700 font-medium">{formatRupiah(plot.price)}</td>
                                     <td className="px-6 py-4">
-                                        {/* Tampilkan status kavling */}
                                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${plot.status === 'available' ? 'bg-green-100 text-green-800' : plot.status === 'booked' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                                             {plot.status.charAt(0).toUpperCase() + plot.status.slice(1)}
                                         </span>
@@ -144,7 +180,7 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
                 </div>
             </div>
 
-            {/* MODAL TAMBAH/EDIT KAVLING */}
+            {/* MODAL (Tidak Berubah) */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <form onSubmit={handleSubmit} className="bg-white rounded-xl w-full max-w-md p-6 space-y-4 animate-in zoom-in duration-300">
@@ -154,11 +190,46 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
                                 <X size={20} />
                             </button>
                         </div>
-                        
-                        <input name="number" type="text" value={formData.number} onChange={handleInputChange} placeholder="Nomor Kavling (A1, B5)" className="w-full p-3 border rounded-lg" required disabled={isLoading} />
-                        <input name="size" type="text" value={formData.size} onChange={handleInputChange} placeholder="Ukuran (misal: 2x1m)" className="w-full p-3 border rounded-lg" required disabled={isLoading} />
+                        {!currentPlot && (
+                            <input 
+                                name="number" 
+                                type="text" 
+                                value={formData.number} 
+                                onChange={handleInputChange} 
+                                placeholder="Nomor Kavling (A1, B5)" 
+                                className="w-full p-3 border rounded-lg" 
+                                required 
+                                disabled={isLoading} 
+                            />
+                        )}
+
+                        <select
+                              name="size"
+                              value={formData.size}
+                              onChange={handleInputChange}
+                              className="w-full p-3 border rounded-lg"
+                              required
+                              disabled={isLoading}
+                            >
+                              <option value="" disabled>Pilih Ukuran</option>
+                              <option value="Single">Single</option>
+                              <option value="Family">Family</option>
+                              <option value="Deluxe">Deluxe</option>
+                        </select>
                         <input name="price" type="number" value={formData.price} onChange={handleInputChange} placeholder="Harga (tanpa Rp)" className="w-full p-3 border rounded-lg" required disabled={isLoading} />
-                        
+                         <select
+                              name="status"
+                              value={formData.status}
+                              onChange={handleInputChange}
+                              className="w-full p-3 border rounded-lg"
+                              required
+                              disabled={isLoading}
+                            >
+                              <option value="" disabled>Pilih Status</option>
+                              <option value="available">Tersedia</option>
+                              <option value="booked">Ter-booking</option>
+                              <option value="occupied">Terisi</option>
+                        </select>
                         <div className="flex justify-end space-x-2 pt-4">
                             <button type="button" onClick={() => setIsModalOpen(false)} className="bg-stone-200 text-stone-700 px-4 py-2 rounded-lg hover:bg-stone-300 transition" disabled={isLoading}>Batal</button>
                             <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition" disabled={isLoading}>

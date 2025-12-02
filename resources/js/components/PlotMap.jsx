@@ -1,24 +1,7 @@
 import React from 'react';
 import { X, Maximize2, Users } from 'lucide-react';
-
+ 
 const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
-  const getPlotVisualization = (size) => {
-    const visualizations = {
-      '2x1': {
-        image: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=400&h=300&fit=crop',
-        description: 'Kavling standar dengan 2 lubang pemakaman. Cocok untuk pasangan suami istri atau keluarga kecil.'
-      },
-      '3x1.5': {
-        image: 'https://images.unsplash.com/photo-1580130732478-a660d235c17a?w=400&h=300&fit=crop',
-        description: 'Kavling sedang dengan kapasitas 4 lubang. Ideal untuk keluarga dengan perawatan taman yang baik.'
-      },
-      '4x2': {
-        image: 'https://images.unsplash.com/photo-1583495219746-8f609e1d7a1f?w=400&h=300&fit=crop',
-        description: 'Kavling besar dengan 6 lubang pemakaman. Sempurna untuk keluarga besar dengan area luas dan pemandangan indah.'
-      }
-    };
-    return visualizations[size] || visualizations['2x1'];
-  };
 
   return (
     <section className="py-16 px-4 bg-white">
@@ -34,7 +17,6 @@ const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {plots.map((plot) => {
-            const visualization = getPlotVisualization(plot.size);
             
             return (
               <div
@@ -52,7 +34,7 @@ const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
                 {/* Image visualization */}
                 <div className="relative h-48 overflow-hidden">
                   <img 
-                    src={visualization.image} 
+                    src={plot.images} 
                     alt={`Kavling ${plot.number}`}
                     className="w-full h-full object-cover"
                   />
@@ -79,7 +61,7 @@ const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
                 {/* Content */}
                 <div className="p-6 bg-white">
                   <p className="text-stone-600 text-sm leading-relaxed mb-6 min-h-[60px]">
-                    {visualization.description}
+                    {plot.description}
                   </p>
 
                   <div className="grid grid-cols-2 gap-4 mb-6">

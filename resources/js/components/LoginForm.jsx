@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from '../config/axios';
 
-const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotification }) => {
+const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotification, showNotification }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -28,14 +28,10 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setIsAdmin(true);
             setView('admin');
-            setNotification({ type: 'success', message: response.data.message });
+            showNotification(response.data.message || 'Berhasil Login, Selamat Datang :) .', 'success');
 
         } catch (error) {
-            console.error("Login gagal:", error);
-            const errorMessage = error.response?.data?.errors?.email?.[0] || 
-                                 error.response?.data?.message || 
-                                 "Gagal melakukan login. Mohon periksa kredensial Anda.";
-            setNotification({ type: 'error', message: errorMessage });
+            showNotification("Login Gagal, Periksa Email atau Password!", 'error');
         } finally {
             setIsLoggingIn(false);
         }

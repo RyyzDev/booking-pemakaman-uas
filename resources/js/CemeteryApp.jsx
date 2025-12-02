@@ -11,7 +11,9 @@ import AdminDashboard from './components/AdminDashboard';
 import AboutSection from './components/AboutSection';
 import FeatureSection from './components/FeatureSection';
 import Footer from './components/Footer';
-
+import Testimony from './components/Testimony';
+import CTASection from './components/CTASection';
+ 
 export default function App() {
   // --- STATE MANAGEMENT ---
   const initialView = localStorage.getItem('lastView') || 'home';
@@ -59,12 +61,14 @@ const fetchPlots = useCallback(async () => {
     try {
       // Mengambil data kavling dari endpoint
       const response = await axios.get('/api/plots');
-      setPlots(response.data.map(p => ({
+      setPlots(response.data.data.map(p => ({
         ...p,
         status: p.status || 'available',
         price: p.price,
         size: p.size,
-        number: p.number
+        number: p.number,
+        description: p.description,
+        images: p.images
       })));
     } catch (error) {
       console.error("Gagal mengambil data kavling:", error);
@@ -255,7 +259,7 @@ const handleStatusChange = async (orderId, newStatus) => {
     <div className="min-h-screen bg-stone-50 text-stone-800 font-sans">
       {notification && (
         <div 
-          className={`fixed top-20 right-5 px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-2 transition-transform duration-300 ease-out 
+          className={`fixed top-20 mt-15 right-5 px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-2 transition-transform duration-300 ease-out 
           ${notification.type === 'success' ? 'bg-emerald-800 text-white' : 'bg-red-600 text-white'}`}
         >
           {notification.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
@@ -309,25 +313,28 @@ const handleStatusChange = async (orderId, newStatus) => {
               </style>
                  <AboutSection />
       <FeatureSection />
+      <Testimony />
+      <CTASection />
             </div>
             <Footer />
           </>
         )}
         {view === 'booking' && (
-          <div className="pt-8">
+          <div className="pt-30">
             <PlotMap plots={plots} handlePlotClick={handlePlotClick} isLoading={isLoading} />
           </div>
         )}
 
 
        {view === 'login' && !isAdmin && ( 
-                <div className="flex justify-center items-center h-full">
+                <div className="flex justify-center items-center h-full pt-40">
                     <LoginForm 
                         setView={setView} 
                         setIsAdmin={setIsAdmin} 
                         isLoggingIn={isLoggingIn} 
                         setIsLoggingIn={setIsLoggingIn} 
-                        setNotification={setNotification} 
+                        setNotification={setNotification}
+                        showNotification={showNotification}
                     />
                 </div>
             )}

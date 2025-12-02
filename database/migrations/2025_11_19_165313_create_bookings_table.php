@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('kavling_id')
                   ->constrained('kavlings') // Pastikan nama tabel di sini sama dengan di atas
-                  ->onDelete('restrict'); // Tidak boleh dihapus jika masih ada booking
+                  ->onDelete('cascade'); // Tidak boleh dihapus jika masih ada booking
             
             $table->string('customer_name');
             $table->string('email');
