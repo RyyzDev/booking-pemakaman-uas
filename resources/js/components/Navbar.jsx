@@ -28,7 +28,7 @@ const Navbar = ({ setView, view, isAdmin, handleLogout }) => {
               <div className="bg-emerald-800 p-2 rounded-full">
                 <Trees className="w-6 h-6 text-emerald-300" />
               </div>
-              <span className="tracking-wide">Eternity Gardens</span>
+              <span className="text-white-600">Eternity</span> <span className="text-white-800">Gardens</span>
             </div>
 
             {/* DESKTOP MENU */}

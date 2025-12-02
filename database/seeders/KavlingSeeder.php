@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Kavling; // Pastikan Model Kavling sudah ada
+use App\Models\Kavling;
 
 class KavlingSeeder extends Seeder
 {

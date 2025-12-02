@@ -7,7 +7,7 @@ use App\Models\Kavling;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
-{
+{ 
     public function store(Request $request)
     {
         $validatedData = $request->validate([

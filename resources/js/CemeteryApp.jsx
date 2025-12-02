@@ -8,6 +8,9 @@ import Hero from './components/Hero';
 import PlotMap from './components/PlotMap';
 import LoginForm from './components/LoginForm';
 import AdminDashboard from './components/AdminDashboard';
+import AboutSection from './components/AboutSection';
+import FeatureSection from './components/FeatureSection';
+import Footer from './components/Footer';
 
 export default function App() {
   // --- STATE MANAGEMENT ---
@@ -249,7 +252,7 @@ const handleStatusChange = async (orderId, newStatus) => {
 
   // --- MAIN RENDER ---
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans pb-10">
+    <div className="min-h-screen bg-stone-50 text-stone-800 font-sans">
       {notification && (
         <div 
           className={`fixed top-20 right-5 px-6 py-3 rounded-lg shadow-xl z-50 flex items-center gap-2 transition-transform duration-300 ease-out 
@@ -261,13 +264,12 @@ const handleStatusChange = async (orderId, newStatus) => {
       )}
 
       <Navbar setView={setView} view={view} isAdmin={isAdmin} handleLogout={handleLogout} />
-
-      <div className="min-h-[calc(100vh-80px)]">
+      <div>
         {view === 'home' && (
           <>
             <Hero setView={setView} />
             <div className="relative bg-white pb-20">  
-              <div className="relative z-10 pt-12 text-center">
+            {/*  <div className="relative z-10 pt-12 text-center">
                 <h3 className="font-serif text-2xl text-emerald-900 mb-4">
                   Mengapa Memilih Eternity Gardens?
                 </h3>
@@ -295,7 +297,7 @@ const handleStatusChange = async (orderId, newStatus) => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div>*/}
               
               <style>
                 {`
@@ -305,10 +307,12 @@ const handleStatusChange = async (orderId, newStatus) => {
                   }
                 `}
               </style>
+                 <AboutSection />
+      <FeatureSection />
             </div>
+            <Footer />
           </>
         )}
-
         {view === 'booking' && (
           <div className="pt-8">
             <PlotMap plots={plots} handlePlotClick={handlePlotClick} isLoading={isLoading} />
@@ -341,9 +345,7 @@ const handleStatusChange = async (orderId, newStatus) => {
           </div>
         )}
 
-
-      </div>
-
+      </div>   
         {showModal && selectedPlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md animate-in zoom-in duration-300">
