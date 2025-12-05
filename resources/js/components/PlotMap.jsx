@@ -1,17 +1,32 @@
 import React from 'react';
 import { X, Maximize2, Users } from 'lucide-react';
  
-const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
+const PlotMap = ({ plots, handlePlotClick, isLoading, handleSubmitBooking }) => {
 
   return (
     <section className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-2">
+          <h2 className="text-4xl font-bold mb-10">
             <span className="text-emerald-600">Denah</span> <span className="text-stone-800">Kavling</span>
           </h2>
-          <p className="text-stone-600">Klik pada kavling untuk melakukan pemesanan</p>
-          
+          <div className="text-left bg-emerald-100 p-4 rounded-lg shadow-sm">
+            <legend className="text-stone-600 mb-2 text-center">
+              <strong>Note:</strong>
+            </legend>
+            <div className="flex justify-between items-center py-1">
+              <strong className="text-emerald-500">Single : </strong> 
+              <span>1 x 2,5 Meter</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <strong className="text-slate-500">Family : </strong> 
+              <span>4 x 4,5 Meter</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <strong className="text-yellow-500">Deluxe : </strong> 
+              <span>9 x 9,5 Meter</span>
+            </div>
+          </div>
           {isLoading && <div className="mt-4 text-emerald-600">Memuat data kavling...</div>}
         </div>
 
@@ -118,6 +133,7 @@ const PlotMap = ({ plots, handlePlotClick, isLoading }) => {
       </div>
     </section>
   );
+
 };
 
 export default PlotMap;

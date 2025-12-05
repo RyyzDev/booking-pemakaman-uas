@@ -209,7 +209,7 @@ const handlePlotClick = (plot) => {
       
       // Ambil plots terbaru agar peta terupdate (status: booked)
       await fetchPlots(); 
-      setView('home');
+      setView('booking');
 
     } catch (error) {
       console.error("Gagal mengirim booking:", error.response || error);
@@ -314,7 +314,9 @@ const handleStatusChange = async (orderId, newStatus) => {
                  <AboutSection />
       <FeatureSection />
       <Testimony />
-      <CTASection />
+      <CTASection 
+          setView={setView}
+      />
             </div>
             <Footer />
           </>
@@ -344,6 +346,7 @@ const handleStatusChange = async (orderId, newStatus) => {
               orders={orders}
               plots={plots}
               fetchPlots={fetchPlots}
+              fetchOrders={fetchOrders} 
               isLoading={isLoading} 
               handleStatusChange={handleStatusChange} 
               handleLogout={handleLogout}
@@ -369,7 +372,7 @@ const handleStatusChange = async (orderId, newStatus) => {
             <div className="p-6 space-y-4">
               <div className="bg-stone-50 p-3 rounded border">
                 <img 
-                    src="https://www.makamalazhar.co.id/wp-content/uploads/2025/04/Investasi-Akhir-Bermakna-Memiliki-Kavling-Makam-Keluarga-1024x576.jpg" 
+                    src={selectedPlot.images} 
                     alt="Visualisasi Makam"
                     className="w-full h-40 object-cover rounded-md border border-stone-200"
                   />

@@ -10,8 +10,6 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
     const [currentPlot, setCurrentPlot] = useState(null); 
     const [formData, setFormData] = useState({ number: '', size: '', price: '', status: '' });
     const [isLoading, setIsLoading] = useState(false); 
-    
-    // STATE BARU: Untuk menyimpan urutan sort (asc = naik, desc = turun)
     const [sortOrder, setSortOrder] = useState('asc'); 
 
     // Panggil fetchPlots saat komponen dimuat
@@ -20,7 +18,6 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
     }, [fetchPlots]);
 
     // LOGIKA SORTING (Natural Sort)
-    // Kita gunakan useMemo agar sorting hanya dijalankan jika data plots atau sortOrder berubah
     const sortedPlots = useMemo(() => {
         // Buat salinan array agar tidak memutasi props asli
         let dataToSort = [...plots];
@@ -30,7 +27,6 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
             const valA = a.number ? a.number.toString() : '';
             const valB = b.number ? b.number.toString() : '';
 
-            // localeCompare dengan opsi { numeric: true } menangani A1, A2, A10 dengan benar
             if (sortOrder === 'asc') {
                 return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
             } else {
@@ -103,6 +99,7 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
 
     return (
         <div className="space-y-6">
+            <h2 className="text-2xl text-center font-arial font-bold text-emerald-800 mb-6">Kelola Kavling</h2>
             <div className="flex justify-between items-center">
                 <button
                     onClick={handleAddClick} 

@@ -15,20 +15,48 @@ class KavlingSeeder extends Seeder
     {
         // Hapus data lama
         Kavling::truncate();
-
-        // Data Kavling
-        $plots = [
-            ['number' => 'A-01', 'size' => 'Single', 'price' => 25000000.00, 'status' => 'available'],
-            ['number' => 'A-02', 'size' => 'Single', 'price' => 25000000.00, 'status' => 'available'],
-            ['number' => 'A-03', 'size' => 'Single', 'price' => 25000000.00, 'status' => 'available'],
-            ['number' => 'B-01', 'size' => 'Deluxe', 'price' => 45000000.00, 'status' => 'available'],
-            ['number' => 'B-02', 'size' => 'Deluxe', 'price' => 45000000.00, 'status' => 'available'],
-            ['number' => 'C-01', 'size' => 'Family', 'price' => 75000000.00, 'status' => 'available'],
-            ['number' => 'X-10', 'size' => 'Single', 'price' => 25000000.00, 'status' => 'booked'],
-            ['number' => 'X-11', 'size' => 'Deluxe', 'price' => 45000000.00, 'status' => 'booked'],
-            ['number' => 'Z-20', 'size' => 'Single', 'price' => 25000000.00, 'status' => 'occupied'],
-            ['number' => 'Z-21', 'size' => 'Family', 'price' => 75000000.00, 'status' => 'occupied'],
+        $plots = [];
+        $plot_counter = 1;
+        $sections = ['A', 'B', 'C', 'D'];
+        $prices = [
+            'Single' => 25000000.00,
+            'Deluxe' => 45000000.00,
+            'Family' => 75000000.00,
         ];
+        $timestamp = now();
+
+        for ($i = 0; $i < 36; $i++) {
+            $section_index = floor($i / 9);
+            $section_char = $sections[$section_index];
+            $number = sprintf('%s-%02d', $section_char, $plot_counter++);
+
+            if ($i % 3 == 0) {
+                $size = 'Single';
+            } elseif ($i % 3 == 1) {
+                $size = 'Deluxe';
+            } else {
+                $size = 'Family';
+            }
+            $price = $prices[$size];
+
+            if ($i < 22) {
+                $status = 'available';
+            } elseif ($i < 30) {
+                $status = 'booked';
+            } else {
+                $status = 'occupied';
+            }
+
+            $plots[] = [
+                'number' => $number,
+                'size' => $size,
+                'price' => $price,
+                'status' => $status,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
+        }
+
 
         DB::table('kavlings')->insert($plots);
     }

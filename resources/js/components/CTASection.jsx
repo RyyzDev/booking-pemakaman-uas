@@ -1,7 +1,7 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Book, ArrowRight, CheckCircle } from 'lucide-react';
 
-const CTASection = () => {
+const CTASection = ({setView}) => {
   return (
     <section className="relative py-20 px-4 overflow-hidden">
       {/* Background with overlay */}
@@ -46,15 +46,10 @@ const CTASection = () => {
 
             {/* Primary CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-white text-emerald-900 px-8 py-4 rounded-xl font-bold hover:bg-emerald-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2 group">
-                <Phone className="w-5 h-5" />
-                Hubungi Sekarang
+              <button onClick={() => setView('booking')} className="bg-white-700 text-white-900 px-8 py-4 rounded-xl font-bold hover:bg-emerald-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2 group">
+                <Book className="w-5 h-5" />
+                Pesan <span className="text-sky-800">Sekarang!</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              
-              <button className="bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold hover:bg-emerald-600 transition-all duration-300 border-2 border-emerald-500 flex items-center justify-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Jadwalkan Kunjungan
               </button>
             </div>
           </div>

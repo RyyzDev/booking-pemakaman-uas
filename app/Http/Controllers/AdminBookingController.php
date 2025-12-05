@@ -11,7 +11,6 @@ class AdminBookingController extends Controller
  
 	public function index() 
 	{
-		// Ambil semua booking dengan relasi kavling (dan customer jika ada)
 		$orders = Booking::with('kavling')->orderBy('id', 'desc')->get();
 		return response()->json(['orders' => $orders]);
 	}
@@ -33,10 +32,8 @@ class AdminBookingController extends Controller
 
 			if ($kavling) {
 				if ($request->status == 'completed') {
-					// Jika booking completed, kavling jadi occupied
 					$kavling->status = 'occupied';
 				} else {
-					// (pending, processing, ready), kavling jadi booked
 					$kavling->status = 'booked';
 				}
 			
@@ -46,5 +43,14 @@ class AdminBookingController extends Controller
 		$booking->load('kavling');
 
 		return response()->json(['message' => 'Status pesanan berhasil diperbarui.', 'booking' => $booking]);
+	}
+
+	public function destroy($id){
+		$booking = Booking::findOrFail($id);
+        $booking->delete();
+
+        $message = "Berhasil Dihapus";
+
+        return response()->json($message);
 	}
 }
