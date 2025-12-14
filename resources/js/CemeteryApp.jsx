@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Trees, MapPin, User, AlertCircle, Settings, LayoutGrid, X, CreditCard, CheckCircle, Loader2, Copy  } from 'lucide-react';
+import { Trees, MapPin, User, AlertCircle, Settings, LayoutGrid, X, CreditCard, CheckCircle, Loader2, Copy, ArrowLeft  } from 'lucide-react';
 import axios from './config/axios';
 import { formatRupiah } from './utils/formatRupiah';
 import { ORDER_STATUSES } from './utils/constants';
@@ -579,7 +579,7 @@ export default function App() {
                     <p className="text-stone-500 text-sm">Nomor Virtual Account</p>
                     <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center justify-between group cursor-pointer relative">
                       <span className="font-mono text-2xl font-bold text-emerald-800 tracking-wider">
-                        3682 2378 2837 2738 <-- NIK NYA IDHAM
+                        3682 2378 2837 2738 <ArrowLeft /> NIK NYA IDHAM
                       </span>
                       <Copy className="w-4 h-4 text-emerald-600 opacity-50 group-hover:opacity-100" />
                     </div>
