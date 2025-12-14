@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Phone, Mail, Eye, AlertCircle, CheckCircle, Clock, XCircle, X, MapPin, Printer, Trash2 } from 'lucide-react';
 import KavlingManagement from './KavlingManagement';
-import FinancialReport from './FinancialReport'; // IMPORT COMPONENT BARU
+import FinancialReport from './FinancialReport'; 
 import {ORDER_STATUSES} from '../utils/constants';
 import {formatRupiah} from '../utils/formatRupiah';
-import axios from '../config/axios'; // TAMBAHKAN IMPORT axios
+import axios from '../config/axios'; 
 
 
 
@@ -21,17 +21,95 @@ const DetailItem = ({ label, value, icon }) => (
 
 // --- MAIN COMPONENT ---
 
-const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, handleLogout, handleStatusChange, showNotification }) => {
+const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading, handleLogout, handleStatusChange, showNotification }) => {
     
     const [activeTab, setActiveTab] = useState('orders');
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [isLoadingOrder, setIsLoadingOrder] = useState(false); 
+    const [isLoadingOrder, setIsLoadingOrder] = useState(false);
+    const [filterPeriod, setFilterPeriod] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
+
 
     const pendingCount = orders.filter(o => o.status === 'pending').length;
     const processingCount = orders.filter(o => o.status === 'processing').length;
     const readyCount = orders.filter(o => o.status === 'ready').length;
     const completedCount = orders.filter(o => o.status === 'completed').length;
+      // --- Logic Filter & Statistik
+    const filteredOrders = useMemo(() => {
+        if (!orders) return [];
+        let filtered = [...orders];
+        if (filterStatus !== 'all') {
+            filtered = filtered.filter(order => order.status === filterStatus);
+        }
+        if (filterPeriod !== 'all') {
+            const now = new Date();
+            filtered = filtered.filter(order => {
+                const orderDate = new Date(order.created_at);
+                switch(filterPeriod) {
+                    case 'today': return orderDate.toDateString() === now.toDateString();
+                    case 'week': return orderDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    case 'month': return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+                    case 'year': return orderDate.getFullYear() === now.getFullYear();
+                    default: return true;
+                }
+            });
+        }
+        return filtered;
+    }, [orders, filterPeriod, filterStatus]);
+
+    const statistics = useMemo(() => {
+        // FIX: Tambahkan Number() untuk mencegah error kalkulasi jika data API berupa string
+        const getPrice = (order) => Number(order.kavling?.price || 0);
+
+        const totalRevenue = filteredOrders.reduce((sum, order) => sum + getPrice(order), 0);
+        
+        const completedOrders = filteredOrders.filter(o => o.status === 'completed');
+        const completedRevenue = completedOrders.reduce((sum, order) => sum + getPrice(order), 0);
+        
+        const pendingOrders = filteredOrders.filter(o => o.status === 'pending');
+        const pendingRevenue = pendingOrders.reduce((sum, order) => sum + getPrice(order), 0);
+        
+        return {
+            totalRevenue,
+            completedRevenue,
+            pendingRevenue,
+            totalOrders: filteredOrders.length,
+            completedCount: completedOrders.length,
+            pendingCount: pendingOrders.length,
+            averageOrderValue: filteredOrders.length > 0 ? totalRevenue / filteredOrders.length : 0
+        };
+    }, [filteredOrders]);
+
+    const monthlyData = useMemo(() => {
+        const grouped = {};
+        filteredOrders.forEach(order => {
+            const date = new Date(order.created_at);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!grouped[monthKey]) grouped[monthKey] = { count: 0, revenue: 0 };
+            grouped[monthKey].count += 1;
+            // FIX: Tambahkan Number()
+            grouped[monthKey].revenue += Number(order.kavling?.price || 0);
+        });
+        return Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
+    }, [filteredOrders]);
+
+     const formatMonth = (monthKey) => {
+        const [year, month] = monthKey.split('-');
+        const date = new Date(year, parseInt(month) - 1);
+        return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
+    };
+
+    const getPeriodLabel = () => {
+        switch(filterPeriod) {
+            case 'today': return 'Hari Ini';
+            case 'week': return '7 Hari Terakhir';
+            case 'month': return 'Bulan Ini';
+            case 'year': return 'Tahun Ini';
+            default: return 'Semua Waktu';
+        }
+    };
+
 
     const handleViewDetails = (order) => {
         setSelectedOrder(order);
@@ -64,7 +142,6 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
             const response = await axios.delete(`/api/orders/${id}`);
             showNotification(response.data.message || 'Pesanan berhasil dihapus.', 'success');
             
-            // PERBAIKAN: Fetch ulang orders setelah delete berhasil
             await fetchOrders();
             
         } catch (error) {
@@ -73,6 +150,32 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
         } finally {
             setIsLoadingOrder(false);
         }
+    };
+
+     const getUserName = () => {
+        try {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                const user = JSON.parse(userData);
+                return user.name || 'Admin';
+            }
+        } catch (error) {
+            console.error('Error parsing userData:', error);
+        }
+        return 'Admin';
+    };
+
+    const getUserEmail = () => {
+        try {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                const user = JSON.parse(userData);
+                return user.email || '';
+            }
+        } catch (error) {
+            console.error('Error parsing userData:', error);
+        }
+        return '';
     };
 
     return (
@@ -257,6 +360,11 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                     <FinancialReport 
                         orders={orders} 
                         plots={plots}
+                        filteredOrders={filteredOrders}
+                        statistics={statistics}
+                        monthlyData={monthlyData}
+                        formatMonth={formatMonth}
+                        getPeriodLabel={getPeriodLabel}
                     />
                 </div>
             )}
@@ -278,8 +386,7 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                                 
                                 <div className="col-span-1 space-y-4 border-r pr-6">
                                     <div className="space-y-2 pb-2 border-b">
-                                        <p className="text-sm font-medium text-stone-500 flex justify-between items-center">
-                                            Tanggal Order: 
+                                        <p className="text-sm font-medium text-stone-500 flex justify-between items-center"> 
                                             <span className="font-semibold text-stone-700">
                                                 {formatDate(selectedOrder.created_at)}
                                             </span>
@@ -289,6 +396,7 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                                             const StatusIcon = statusData.icon;
                                             return (
                                                 <div className="flex justify-start">
+                                                    <span><strong>STATUS : </strong></span> 
                                                     <span className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold shadow-md ${statusData.color}`}>
                                                         <StatusIcon className="w-4 h-4" /> 
                                                         {statusData.label}
@@ -297,7 +405,7 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                                             );
                                         })()}
                                     </div>
-                                    <h4 className="font-bold text-lg text-stone-700 mt-4">👤 Informasi Pelanggan</h4>
+                                    <h4 className="font-bold text-lg text-stone-700 mt-4">Informasi Pelanggan</h4>
                                     <div className="space-y-3 text-sm">
                                         <DetailItem label="Nama Lengkap" value={selectedOrder.customer_name} />
                                         <DetailItem label="Email" value={selectedOrder.email} icon={<Mail size={14} />} />
@@ -305,20 +413,20 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                                     </div>
                                 </div>
 
-                                <div className="col-span-1 space-y-4 border-r pr-6">
-                                    <h4 className="font-bold text-lg text-stone-700">📍 Alamat Pengiriman</h4>
+                                <div className="col-span-1 space-y-4 border-r mr-5 pr-5">
+                                    <h4 className="font-bold text-lg text-stone-700">Alamat Customer</h4>
                                     <div className="p-3 bg-stone-50 border border-stone-200 rounded-lg text-sm">
                                         <p className="font-medium text-stone-900 flex items-start gap-2">
                                             <MapPin size={16} className="mt-0.5 text-stone-500 flex-shrink-0" />
                                             {selectedOrder.address || 'Alamat tidak tersedia.'}
                                         </p>
                                     </div>
-                                    <h4 className="font-bold text-lg text-stone-700 pt-3">🏡 Detail Kavling</h4>
+                                    <h4 className="font-bold text-lg text-stone-700 pt-3">Detail Kavling</h4>
                                     {selectedOrder.kavling ? (
                                         <div className="space-y-3 text-sm">
                                             <DetailItem label="Nomor Kavling" value={<span className="font-extrabold text-xl text-emerald-700">{selectedOrder.kavling.number}</span>} />
                                             <DetailItem label="Ukuran/Tipe" value={selectedOrder.kavling.size} />
-                                            <DetailItem label="Harga Total" value={<span className="font-bold text-xl text-red-600">{formatRupiah(selectedOrder.kavling.price)}</span>} />
+                                            <DetailItem label="Harga Total" value={<span className="font-bold text-l text-red-700">{formatRupiah(selectedOrder.kavling.price)}</span>} />
                                         </div>
                                     ) : (
                                         <div className="text-sm text-stone-500 italic p-3 bg-red-50 rounded-lg">Data kavling tidak tersedia.</div>
@@ -326,7 +434,7 @@ const AdminDashboard = ({ orders, plots, fetchPlots, fetchOrders, isLoading, han
                                 </div>
 
                                 <div className="col-span-1 space-y-4">
-                                    <h4 className="font-bold text-lg text-stone-700">💬 Pesan Customer</h4>
+                                    <h4 className="font-bold text-lg text-stone-700">Pesan Customer</h4>
                                     <div className="p-4 h-full bg-stone-100 border border-stone-200 rounded-lg text-sm text-stone-700 overflow-y-auto max-h-[300px] shadow-inner">
                                         {selectedOrder.notes || 'Tidak ada catatan tambahan dari customer.'}
                                     </div>

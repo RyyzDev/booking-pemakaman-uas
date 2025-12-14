@@ -7,31 +7,55 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
         password: ''
     });
 
-
-
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmitLogin = async (e) => {
         e.preventDefault();
-        setIsLoggingIn(true);
         setNotification(null);
+        setIsLoggingIn(true);
 
         try {
             const response = await axios.post('/api/login', {
                 email: formData.email,
                 password: formData.password
             });
-            const token = response.data.token; 
+            
+            const { token, user } = response.data;
+            
+            // Validasi response
+            if (!token || !user || !user.id) {
+                throw new Error('Response login tidak valid');
+            }
+            
+            // 1. Simpan token ke localStorage
             localStorage.setItem('authToken', token);
+            
+            // 2. Simpan user data untuk verifikasi tambahan (optional)
+            localStorage.setItem('userData', JSON.stringify(user));
+            
+            // 3. Set token ke axios headers
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            
+            // 4. Set admin status langsung (data sudah dari server)
             setIsAdmin(true);
+            
+            // 5. Redirect ke admin
             setView('admin');
-            showNotification(response.data.message || 'Berhasil Login, Selamat Datang :) .', 'success');
+            
+            showNotification(`Selamat Datang, ${user.name}! 👋`, 'success');
 
         } catch (error) {
-            showNotification("Login Gagal, Periksa Email atau Password!", 'error');
+            console.error('Login error:', error);
+            
+            // Bersihkan jika gagal
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            delete axios.defaults.headers.common['Authorization'];
+            
+            const errorMsg = error.response?.data?.message || "Login Gagal, Periksa Email atau Password!";
+            showNotification(errorMsg, 'error');
         } finally {
             setIsLoggingIn(false);
         }
@@ -39,10 +63,10 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
 
     return (
         <div className="max-w-md mx-auto p-8 mt-10 bg-white shadow-xl rounded-xl">
-            <h2 className="text-3xl font-bold text-center text-emerald-800 mb-6">🔑 Admin Login</h2>
-            <form onSubmit={handleSubmitLogin} className="space-y-6">
+            <h2 className="text-3xl font-bold text-center text-emerald-800 mb-6">🔒 Admin Login</h2>
+            <div className="space-y-6">
                 <div>
-                    <legend className="block text-sm font-medium text-stone-700 mb-1" htmlFor="email">Email</legend>
+                    <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="email">Email</label>
                     <input 
                         id="email"
                         name="email" 
@@ -51,10 +75,11 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
                         onChange={handleInputChange} 
                         className="w-full p-3 border border-stone-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" 
                         required 
+                        autoComplete="email"
                     />
                 </div>
                 <div>
-                    <legend className="block text-sm font-medium text-stone-700 mb-1" htmlFor="password">Password</legend>
+                    <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="password">Password</label>
                     <input
                         id="password"
                         name="password" 
@@ -63,16 +88,17 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
                         onChange={handleInputChange} 
                         className="w-full p-3 border border-stone-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" 
                         required 
+                        autoComplete="current-password"
                     />
                 </div>
                 <button 
-                    type="submit" 
-                    className="w-full bg-emerald-800 text-white py-3 rounded-lg hover:bg-emerald-700 transition font-semibold" 
+                    onClick={handleSubmitLogin}
+                    className="w-full bg-emerald-800 text-white py-3 rounded-lg hover:bg-emerald-700 transition font-semibold disabled:bg-stone-400 disabled:cursor-not-allowed" 
                     disabled={isLoggingIn}
                 >
-                    {isLoggingIn ? 'Masuk...' : 'Masuk ke Admin Panel'}
+                    {isLoggingIn ? 'Memverifikasi...' : 'Masuk ke Admin Panel'}
                 </button>
-            </form>
+            </div>
             <div className="text-center mt-4">
                 <button onClick={() => setView('home')} className="text-sm text-stone-500 hover:text-emerald-800 transition">
                     ← Kembali ke Halaman Utama
@@ -82,4 +108,4 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
     );
 };
 
-export default LoginForm;
+export default LoginForm

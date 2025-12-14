@@ -10,7 +10,8 @@ class Booking extends Model {
         'customer_name', 
         'email', 
         'phone', 
-        'status', 
+        'status',
+        'address',
         'notes'
     ];
 

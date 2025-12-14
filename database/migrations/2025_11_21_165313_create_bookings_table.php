@@ -6,32 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kavling_id')
-                  ->constrained('kavlings') // Pastikan nama tabel di sini sama dengan di atas
-                  ->onDelete('cascade'); // Tidak boleh dihapus jika masih ada booking
+                  ->constrained('kavlings')
+                  ->onDelete('cascade'); 
             
             $table->string('customer_name');
             $table->string('email');
             $table->string('phone');
+            $table->string('address');
             $table->text('notes')->nullable();
             
-            // Status: 'pending', 'processing', 'ready', 'completed' (sesuai frontend dan controller)
+           
             $table->enum('status', ['pending', 'processing', 'ready', 'completed'])->default('pending');
             
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('bookings');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -44,12 +45,17 @@ class AuthController extends Controller
                 'email' => ['Kredensial atau hak akses tidak valid.'],
             ]);
         }
-        $token = $user->createToken('admin-access')->plainTextToken;
+        $token = $user->createToken('authToken')->plainTextToken;
 
         return response()->json([
             'token' => $token,
             'user' => $user,
         ]);
+    }
+
+    public function user(Request $request){
+       $user =  DB::table('users')->get();
+       return response()->json($user);
     }
 
     // Fungsi Logout

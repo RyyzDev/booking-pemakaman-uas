@@ -1,6 +1,4 @@
-//format rupiah
 export const formatRupiah = (number) => {
-    // Pastikan input adalah angka
     if (isNaN(number) || number === null) {
         return 'Rp 0';
     }

@@ -2,13 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { DollarSign, TrendingUp, Calendar, FileText, Printer } from 'lucide-react';
 import { formatRupiah } from '../utils/formatRupiah'; 
 import { ORDER_STATUSES } from '../utils/constants'; 
+import {formatMonth} from '../utils/formatMonth';
 
-const FinancialReport = ({ orders, plots }) => {
+const FinancialReport = ({ orders, plots, getPeriodLabel }) => {
     const [filterPeriod, setFilterPeriod] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
 
     // --- Logic Filter & Statistik
     const filteredOrders = useMemo(() => {
+        if (!orders) return [];
+        
         let filtered = [...orders];
         if (filterStatus !== 'all') {
             filtered = filtered.filter(order => order.status === filterStatus);
@@ -30,11 +33,15 @@ const FinancialReport = ({ orders, plots }) => {
     }, [orders, filterPeriod, filterStatus]);
 
     const statistics = useMemo(() => {
-        const totalRevenue = filteredOrders.reduce((sum, order) => sum + (order.kavling?.price || 0), 0);
+        const getPrice = (order) => Number(order.kavling?.price || 0);
+
+        const totalRevenue = filteredOrders.reduce((sum, order) => sum + getPrice(order), 0);
+        
         const completedOrders = filteredOrders.filter(o => o.status === 'completed');
-        const completedRevenue = completedOrders.reduce((sum, order) => sum + (order.kavling?.price || 0), 0);
+        const completedRevenue = completedOrders.reduce((sum, order) => sum + getPrice(order), 0);
+        
         const pendingOrders = filteredOrders.filter(o => o.status === 'pending');
-        const pendingRevenue = pendingOrders.reduce((sum, order) => sum + (order.kavling?.price || 0), 0);
+        const pendingRevenue = pendingOrders.reduce((sum, order) => sum + getPrice(order), 0);
         
         return {
             totalRevenue,
@@ -52,32 +59,14 @@ const FinancialReport = ({ orders, plots }) => {
         filteredOrders.forEach(order => {
             const date = new Date(order.created_at);
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            
             if (!grouped[monthKey]) grouped[monthKey] = { count: 0, revenue: 0 };
+            
             grouped[monthKey].count += 1;
-            grouped[monthKey].revenue += (order.kavling?.price || 0);
+            grouped[monthKey].revenue += Number(order.kavling?.price || 0);
         });
         return Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
     }, [filteredOrders]);
-
-    const handlePrint = () => {
-        window.print();
-    };
-
-    const formatMonth = (monthKey) => {
-        const [year, month] = monthKey.split('-');
-        const date = new Date(year, parseInt(month) - 1);
-        return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
-    };
-
-    const getPeriodLabel = () => {
-        switch(filterPeriod) {
-            case 'today': return 'Hari Ini';
-            case 'week': return '7 Hari Terakhir';
-            case 'month': return 'Bulan Ini';
-            case 'year': return 'Tahun Ini';
-            default: return 'Semua Waktu';
-        }
-    };
 
     return (
         <div className="max-w-7xl mx-auto p-6 bg-white min-h-screen">
@@ -118,9 +107,9 @@ const FinancialReport = ({ orders, plots }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-xl shadow-lg text-white">
-                    <p className="text-emerald-100 text-sm font-medium mb-2">Total Pendapatan</p>
+                    <p className="text-emerald-100 text-sm font-medium mb-2">Total Pendapatan Berjalan</p>
                     <p className="text-3xl font-bold">{formatRupiah(statistics.totalRevenue)}</p>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
@@ -130,10 +119,6 @@ const FinancialReport = ({ orders, plots }) => {
                 <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-6 rounded-xl shadow-lg text-white">
                     <p className="text-amber-100 text-sm font-medium mb-2">Pending</p>
                     <p className="text-3xl font-bold">{formatRupiah(statistics.pendingRevenue)}</p>
-                </div>
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
-                    <p className="text-purple-100 text-sm font-medium mb-2">Rata-rata Nilai</p>
-                    <p className="text-3xl font-bold">{formatRupiah(statistics.averageOrderValue)}</p>
                 </div>
             </div>
 
@@ -199,7 +184,7 @@ const FinancialReport = ({ orders, plots }) => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right font-bold text-stone-900">
-                                                {order.kavling ? formatRupiah(order.kavling.price) : 'Rp 0'}
+                                                {order.kavling ? formatRupiah(Number(order.kavling.price)) : 'Rp 0'}
                                             </td>
                                         </tr>
                                     );

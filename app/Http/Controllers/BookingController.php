@@ -19,6 +19,7 @@ class BookingController extends Controller
             'customer_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
+            'address'=>'required',
             'notes' => 'nullable|string',
         ]);
 
