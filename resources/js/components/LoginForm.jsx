@@ -28,20 +28,17 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
             if (!token || !user || !user.id) {
                 throw new Error('Response login tidak valid');
             }
-            
-            // 1. Simpan token ke localStorage
+
             localStorage.setItem('authToken', token);
-            
-            // 2. Simpan user data untuk verifikasi tambahan (optional)
+
             localStorage.setItem('userData', JSON.stringify(user));
             
-            // 3. Set token ke axios headers
+            //  Set token ke axios headers
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
-            // 4. Set admin status langsung (data sudah dari server)
             setIsAdmin(true);
             
-            // 5. Redirect ke admin
+            //  Redirect ke admin
             setView('admin');
             
             showNotification(`Selamat Datang, ${user.name}! 👋`, 'success');
@@ -49,7 +46,7 @@ const LoginForm = ({ setView, setIsAdmin, isLoggingIn, setIsLoggingIn, setNotifi
         } catch (error) {
             console.error('Login error:', error);
             
-            // Bersihkan jika gagal
+            // jika gagal
             localStorage.removeItem('authToken');
             localStorage.removeItem('userData');
             delete axios.defaults.headers.common['Authorization'];

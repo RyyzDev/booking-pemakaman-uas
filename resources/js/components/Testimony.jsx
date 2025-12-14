@@ -62,7 +62,7 @@ const Testimony = () => {
     }
   ];
 
-  // Efek untuk menangani perubahan ukuran layar (Responsiveness)
+  // Efek untuk menangani perubahan ukuran layar
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -81,7 +81,7 @@ const Testimony = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Reset current index jika itemsPerPage berubah agar tidak out of bounds
+  // Reset current index jika itemsPerPage berubah
   useEffect(() => {
     const maxIndex = Math.ceil(testimonials.length / itemsPerPage) - 1;
     if (currentIndex > maxIndex) {
@@ -121,7 +121,7 @@ const Testimony = () => {
                 <div 
                   key={testimonial.id} 
                   className="flex-shrink-0"
-                  // Kalkulasi lebar dinamis berdasarkan itemsPerPage dan gap (1.5rem / 24px)
+                  // Kalkulasi lebar dinamis berdasarkan itemsPerPage dan gap
                   style={{ width: `calc(${100 / itemsPerPage}% - ${(itemsPerPage - 1) * 1.5 / itemsPerPage}rem)` }}
                 >
                   <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-emerald-100 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
@@ -161,7 +161,7 @@ const Testimony = () => {
             </div>
           </div>
 
-          {/* Navigation Buttons - Disembunyikan jika tidak bisa slide */}
+          {/* Navigation Buttons - Disembunyikan*/}
           {currentIndex > 0 && (
             <button 
               onClick={handlePrev}

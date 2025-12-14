@@ -5,7 +5,6 @@ const Navbar = ({ setView, view, isAdmin, handleLogout }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Efek visual saat di-scroll
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
@@ -17,13 +16,11 @@ const Navbar = ({ setView, view, isAdmin, handleLogout }) => {
         setIsMenuOpen(false);
     };
 
-    // Daftar menu navigasi utama
     const navItems = [
         { label: 'Beranda', target: 'home' },
         { label: 'Cari Kavling', target: 'booking' },
     ];
 
-    // Komponen Tombol Navigasi (Reusable untuk Desktop & Mobile)
     const NavLink = ({ item, isMobile = false }) => (
         <button
             onClick={() => handleNavClick(item.target)}
@@ -37,7 +34,7 @@ const Navbar = ({ setView, view, isAdmin, handleLogout }) => {
             `}
         >
             {item.label}
-            {/* Indikator garis bawah animasi untuk desktop */}
+            {/* Indikator garis bawah animasi*/}
             {!isMobile && view === item.target && (
                 <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-emerald-300 rounded-full animate-in fade-in zoom-in duration-300" />
             )}
@@ -122,7 +119,6 @@ const Navbar = ({ setView, view, isAdmin, handleLogout }) => {
             </div>
 
             {/* MOBILE MENU DROPDOWN */}
-            {/* Menggunakan overflow-hidden dan max-h untuk animasi smooth */}
             <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="px-4 pt-2 pb-6 space-y-2 bg-emerald-950/50 backdrop-blur-xl border-t border-emerald-800/50">
                     

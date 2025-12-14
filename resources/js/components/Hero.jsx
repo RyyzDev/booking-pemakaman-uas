@@ -84,7 +84,7 @@ const Hero = ({ setView }) => (
                         className="fill-emerald-100/20"
                         style={{ animation: 'move-forever 15s cubic-bezier(.55,.5,.45,.5) infinite' }}
                     />
-                    {/* Layer 3: Depan (Warna solid background section berikutnya) */}
+                    {/* Layer 3: Depan */}
                     <use
                         href="#gentle-wave"
                         x="48"
@@ -96,7 +96,7 @@ const Hero = ({ setView }) => (
             </svg>
         </div>
 
-        {/* Inline Style untuk Keyframes Animasi Wave */}
+        {/* Keyframes Animasi Wave */}
         <style jsx>{`
             @keyframes move-forever {
                 0% { transform: translate3d(-90px,0,0); }

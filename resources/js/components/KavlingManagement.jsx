@@ -12,18 +12,15 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
     const [isLoading, setIsLoading] = useState(false); 
     const [sortOrder, setSortOrder] = useState('asc'); 
 
-    // Panggil fetchPlots saat komponen dimuat
     useEffect(() => {
         fetchPlots(); 
     }, [fetchPlots]);
 
-    // LOGIKA SORTING (Natural Sort)
+    // LOGIKA SORTING
     const sortedPlots = useMemo(() => {
-        // Buat salinan array agar tidak memutasi props asli
         let dataToSort = [...plots];
 
         dataToSort.sort((a, b) => {
-            // Pastikan nilai adalah string
             const valA = a.number ? a.number.toString() : '';
             const valB = b.number ? b.number.toString() : '';
 
@@ -177,7 +174,7 @@ const KavlingManagement = ({ plots, fetchPlots, showNotification }) => {
                 </div>
             </div>
 
-            {/* MODAL (Tidak Berubah) */}
+            {/* MODAL */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <form onSubmit={handleSubmit} className="bg-white rounded-xl w-full max-w-md p-6 space-y-4 animate-in zoom-in duration-300">

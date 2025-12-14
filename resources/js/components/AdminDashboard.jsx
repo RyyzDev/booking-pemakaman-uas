@@ -59,7 +59,6 @@ const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading
     }, [orders, filterPeriod, filterStatus]);
 
     const statistics = useMemo(() => {
-        // FIX: Tambahkan Number() untuk mencegah error kalkulasi jika data API berupa string
         const getPrice = (order) => Number(order.kavling?.price || 0);
 
         const totalRevenue = filteredOrders.reduce((sum, order) => sum + getPrice(order), 0);
@@ -88,7 +87,6 @@ const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             if (!grouped[monthKey]) grouped[monthKey] = { count: 0, revenue: 0 };
             grouped[monthKey].count += 1;
-            // FIX: Tambahkan Number()
             grouped[monthKey].revenue += Number(order.kavling?.price || 0);
         });
         return Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0])).slice(-6);
@@ -182,7 +180,7 @@ const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading
      <div className="max-w-6xl mx-auto p-6">
             <div className="mb-20"></div>
 
-            {/* TAB NAVIGATION - TAMBAHKAN TAB BARU */}
+            {/* TAB NAVIGATION */}
             <div className="flex border-b border-stone-300 mb-6 print:hidden">
                 <button
                     onClick={() => setActiveTab('orders')}
@@ -200,7 +198,7 @@ const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading
                 >
                     Kelola Kavling ({plots.length})
                 </button>
-                {/* TAB BARU: LAPORAN KEUANGAN */}
+                {/* TAB LAPORAN KEUANGAN */}
                 <button
                     onClick={() => setActiveTab('financial')}
                     className={`px-6 py-3 text-sm font-medium transition duration-150 ease-in-out ${
@@ -354,7 +352,7 @@ const AdminDashboard = ({ orders = [], plots, fetchPlots, fetchOrders, isLoading
                 </div>
             )}
 
-            {/* TAB BARU: FINANCIAL REPORT */}
+            {/* TAB FINANCIAL REPORT */}
             {activeTab === 'financial' && (
                 <div className="print:hidden">
                     <FinancialReport 

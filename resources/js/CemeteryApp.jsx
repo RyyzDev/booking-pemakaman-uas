@@ -148,7 +148,7 @@ export default function App() {
           const response = await axios.get('/api/user');
           console.log('Verification response:', response.data);
           
-          // Response dari /api/user adalah array
+          // Response dari /api/user array
           const verifiedUser = Array.isArray(response.data) ? response.data[0] : response.data;
           console.log('Verified user:', verifiedUser);
           
@@ -568,14 +568,23 @@ export default function App() {
               {paymentStatus === 'pending' ? (
                 <>
                   <div className="w-full space-y-2 text-center">
+                    <p className="text-yellow-500 text-sm">Total Bayar</p>
+                    <div className="border border-red-500 p-3 rounded-lg flex items-center justify-between group relative">
+                      <span className="text-3xl font-bold text-red-800 tracking-wider">
+                        {formatRupiah(selectedPlot.price)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full space-y-2 text-center">
                     <p className="text-stone-500 text-sm">Nomor Virtual Account</p>
                     <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center justify-between group cursor-pointer relative">
                       <span className="font-mono text-2xl font-bold text-emerald-800 tracking-wider">
-                        8800 1234 5678
+                        3682 2378 2837 2738 <-- NIK NYA IDHAM
                       </span>
                       <Copy className="w-4 h-4 text-emerald-600 opacity-50 group-hover:opacity-100" />
                     </div>
                     <p className="text-xs text-orange-500 font-medium animate-pulse">
+                      Boongan doang kok :p
                       Otomatis terbayar dalam {countdown} detik...
                     </p>
                   </div>
